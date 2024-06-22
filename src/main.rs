@@ -147,6 +147,11 @@ async fn extract_cab(dll_info: &DllInfo) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+async fn delete_cab(dll_info: &DllInfo) -> Result<(), Box<dyn Error>> {
+    tokio::fs::remove_file(&dll_info.cab_path).await?;
+    Ok(())
+}
+
 #[derive(Parser, Debug)]
 #[command(name = "Unity PDB Downloader", version = "1.0.0", author = "jeferwang")]
 struct Args {
@@ -161,12 +166,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Input DLL file: {dll_path}");
 
-    let dll_info = parse_dll(dll_path.as_str()).expect("parse failed");
+    let dll_info = parse_dll(dll_path.as_str()).expect("parse dll failed");
     println!("Parsed {:#?}", dll_info);
 
-    download_cab(&dll_info).await.expect("");
+    download_cab(&dll_info).await.expect("download cab failed");
 
-    extract_cab(&dll_info).await.expect("extract failed");
+    extract_cab(&dll_info).await.expect("extract cab failed");
+
+    delete_cab(&dll_info).await.expect("delete cab failed");
 
     Ok(())
 }
